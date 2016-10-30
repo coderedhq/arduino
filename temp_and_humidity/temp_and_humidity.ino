@@ -171,7 +171,7 @@ void loop(void)
   // Check for incoming characters from Bluefruit
   ble.println("AT+BLEUARTRX");
   ble.readline();
-  Serial.println(ble.buffer);
+  
   if (strcmp(ble.buffer, "OK") == 0) {
     // no data
     return;
@@ -186,6 +186,7 @@ void loop(void)
     ble.print("hum:");
     ble.println(hdc.readHumidity());
   }
+  Serial.println(ble.buffer);
   // Some data was found, its in the buffer
   ble.waitForOK();
 }

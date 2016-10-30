@@ -11,6 +11,8 @@
  All text above, and the splash screen below must be included in
  any redistribution
 *********************************************************************/
+#include <Wire.h>
+#include "Adafruit_HDC1000.h"
 #include <Servo.h>
 #include <Arduino.h>
 #include <SPI.h>
@@ -93,11 +95,15 @@ void error(const __FlashStringHelper*err) {
 */
 /**************************************************************************/
 
+// Servo Variables
 Servo servo1;
 const int OPEN_POS = 20;
 const int CLOSE_POS = 170;
-const int SERVO_PIN = 14;
+const int SERVO_PIN = 2;
 const int SERVO_DELAY = 2000;
+
+// Temperature Sensor
+Adafruit_HDC1000 hdc = Adafruit_HDC1000();
 
 #if defined(ARDUINO_ARCH_SAMD)
 // for Zero, output on USB Serial console, remove line below if using programming port to program the Zero!
@@ -113,6 +119,10 @@ void setup(void)
   
   while (!Serial);  // required for Flora & Micro
   delay(500);
+
+  if (!hdc.begin()) {
+    Serial.println("Couldn't find sensor!");
+  }
 
   Serial.begin(115200);
   Serial.println(F("Adafruit Bluefruit Command Mode Example"));
@@ -180,6 +190,16 @@ void loop(void)
   if (strcmp(ble.buffer, "OK") == 0) {
     // no data
     return;
+  }
+  else if(strcmp(ble.buffer, "cmd:temp")==0){
+    ble.print("AT+BLEUARTTX=");
+    ble.print("temp:");
+    ble.println(hdc.readTemperature());
+  }
+  else if(strcmp(ble.buffer, "cmd:hum")==0){
+    ble.print("AT+BLEUARTTX=");
+    ble.print("hum:");
+    ble.println(hdc.readHumidity());
   }
   else if(strcmp(ble.buffer, "cmd:open")==0){
     openVent();
